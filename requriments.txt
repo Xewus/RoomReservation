@@ -1,1 +1,4 @@
+aiosqlite==0.17.0
+alembic==1.7.7
 fastapi==0.77.1
+SQLAlchemy==1.4.36
