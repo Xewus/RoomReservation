@@ -1,2 +1,2 @@
 # RoomReservation
-App for managment rooms
+App for manage rooms
