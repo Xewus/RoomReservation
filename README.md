@@ -1,2 +1,6 @@
 # RoomReservation
-App for manage rooms
+
+### Python 3.10
+### FastAPI
+
+Room Management application
