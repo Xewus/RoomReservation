@@ -1,11 +1,14 @@
-import sqlalchemy as sql
+import sqlalchemy as sa
 
-from app.core.db import Base
+from app.core import db
 
 
-class MettingRoom(Base):
-    name = sql.Column(
-        sql.String(100),
+class MeetingRoom(db.Base):
+    name = sa.Column(
+        sa.String(100),
         unique=True,
         nullable=False
+    )
+    description = sa.Column(
+        sa.Text()
     )
