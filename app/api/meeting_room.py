@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Body
+from http.client import HTTPException
+from fastapi import APIRouter, Body, HTTPException
 
 from app.core import literals as lit
 from app.crud import meeting_room as mr_crud
@@ -16,5 +17,11 @@ async def create_new_meeting_room(
         example=mr_schemas.MeetingRoomCreate.Config.schema['example']
     )
 ) -> mr_models.MeetingRoom:
+    room_id = await mr_crud.get_room_id_by_name(new_room.name)
+    if room_id is not None:
+        raise HTTPException(
+            status_code=422,
+            detail='Переговорка с таким именем уже существует!'
+        )
     room = await mr_crud.create_meeting_room(new_room)
     return room
