@@ -2,6 +2,8 @@ import pydantic as pd
 
 
 class Settings(pd.BaseSettings):
+    """Настройки проекта.
+    """
     debug: str = False
     app_title: str = 'Booking meeting rooms'
     version: str = '0.0.0'

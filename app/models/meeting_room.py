@@ -4,6 +4,12 @@ from app.core import db
 
 
 class MeetingRoom(db.Base):
+    """ORM-модель для переговорных комнат.
+
+    ## Attrs:
+    - name: Название комнаты.
+    - description: Описание комнаты.
+    """
     name = sa.Column(
         sa.String(100),
         unique=True,

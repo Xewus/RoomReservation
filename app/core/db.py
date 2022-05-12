@@ -1,23 +1,29 @@
-import sqlalchemy as sa
-import sqlalchemy.orm as orm
-import sqlalchemy.ext.asyncio as sa_async
+from sqlalchemy import Column, Integer
+from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 
 from app.core.config import settings
 
 
 class PreBase:
+    """Подготовительный класс для ORM-моделей.
 
-    @orm.declared_attr
+    Устанавливает для наследников название таблиц в формате lowercase
+    и автоматическое добавление столбца id.
+
+    ## Attrs:
+    - id: Столбец для первичного ключа.
+    """
+
+    @declared_attr
     def __tablename__(cls):
         return cls.__name__.lower()
 
-    id = sa.Column(sa.Integer(), primary_key=True)
+    id = Column(Integer(), primary_key=True)
 
 
-Base = orm.declarative_base(cls=PreBase)
+Base = declarative_base(cls=PreBase)
 
-async_engine = sa_async.create_async_engine(settings.database_url)
+async_engine = create_async_engine(settings.database_url)
 
-async_session = sa_async.AsyncSession(bind=async_engine)
-
-AsyncSessionLocal = orm.sessionmaker(bind=async_engine,)
+AsyncSessionLocal = sessionmaker(bind=async_engine, class_=AsyncSession)
