@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.encoders import jsonable_encoder
 
 from app.models import meeting_room as mr_models
 from app.schemas import meeting_room as mr_schemas
@@ -46,6 +47,37 @@ async def get_room_id_by_name(
         )
 
 
+async def check_room_name_duplicate(
+    room_name: str,
+    session: AsyncSession
+) -> bool:
+    """Проверяет наличие объекта с таким же названием.
+
+    ### Args:
+    - room_name (str): _description_
+    - session (AsyncSession): _description_
+
+    ### Returns:
+    - bool: _description_
+    """
+    return not bool(await session.scalar(
+        select(
+            mr_models.MeetingRoom.name
+        ).where(
+            mr_models.MeetingRoom.name == room_name
+        ).limit(1)
+    ))
+
+
+async def read_all_rooms_from_db(
+    session: AsyncSession
+) -> list[mr_models.MeetingRoom]:
+    """Считывает из БД объекты MeetingRoom и возвращает их.
+    """
+    rooms = await session.execute(select(mr_models.MeetingRoom))
+    return rooms.scalars().all()
+
+
 async def create_meeting_room(
     new_room: mr_schemas.MeetingRoomCreate,
     session: AsyncSession,
@@ -68,10 +100,28 @@ async def create_meeting_room(
     return room
 
 
-async def read_all_rooms_from_db(
+async def update_meeting_room(
+    room: mr_models.MeetingRoom,
+    update_data: mr_schemas.MeetingRoomUpdate,
     session: AsyncSession
-) -> list[mr_models.MeetingRoom]:
-    """Считывает из БД объекты MeetingRoom и возвращает их.
+) -> mr_models.MeetingRoom:
+    """Обновляет данные комнаты
+
+    ### Args:
+    - room_id (int): _description_
+    - update_data (mr_schemas.MeetingRoomUpdate): _description_
+    - session (AsyncSession): _description_
+
+    ### Returns:
+    - None | mr_models.MeetingRoom: _description_
     """
-    rooms = await session.execute(select(mr_models.MeetingRoom))
-    return rooms.scalars().all()
+    for field, value in update_data.dict(exclude_unset=True).items():
+        if getattr(room, field):
+            print(room.name)
+            setattr(room, field, value)
+
+    session.add(room)
+    await session.commit()
+    await session.refresh(room)
+
+    return room

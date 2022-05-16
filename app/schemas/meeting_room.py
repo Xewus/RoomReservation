@@ -17,7 +17,7 @@ class MeetingRoomBase(BaseModel):
 
 
 class MeetingRoomCreate(MeetingRoomBase):
-    """"Схема для создания новых MeetingRoom."
+    """Схема для создания новых MeetingRoom.
     """
 
     class Config:
@@ -30,12 +30,18 @@ class MeetingRoomCreate(MeetingRoomBase):
 
 
 class MeetingRoomUpdate(MeetingRoomBase):
+    """Схема для обновления MeetingRoom.
+    """
     name: None | str = Field(
         None,
         title="Название комнаты",
         min_length=1,
         max_length=100
     )
+
+    class Config:
+        orm_mode = True
+        title = "Схема для обновления MeetingRoom"
 
 
 class MeetingRoomResponse(MeetingRoomBase):
