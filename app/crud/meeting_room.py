@@ -8,8 +8,8 @@ from app.schemas import meeting_room as mr_schemas
 async def get_meeting_room_by_id(
     room_id: int,
     session: AsyncSession
-) -> None | mr_models.mr_models.MeetingRoom:
-    """Находит в БД объект `.MeetingRoom` по id.
+) -> None | mr_models.MeetingRoom:
+    """Находит в БД объект `MeetingRoom` по id.
 
     ### Args:
     - room_id (int): _description_
