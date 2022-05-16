@@ -1,38 +1,53 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, Field
 
 
-class MeetingRoomCreate(BaseModel):
-    """Схема приёма значений для создания  MeetingRoom.
-
-    ## Attrs:
-    - name: Название комнаты.
-    - description: Описание комнаты.
+class MeetingRoomBase(BaseModel):
+    """ Базовый класс-схема для MeetingRoom.
     """
-    name: str
-    description: str = None
+    name: str = Field(
+        ...,
+        title="Название комнаты",
+        min_length=1,
+        max_length=100
+    )
+    description: None | str = Field(
+        None,
+        title="Описание комнаты"
+    )
+
+
+class MeetingRoomCreate(MeetingRoomBase):
+    """"Схема для создания новых MeetingRoom."
+    """
 
     class Config:
-        title = "Создание новых MeetingRoom"
+        orm_mode = True
+        title = "Схема для создания новых MeetingRoom"
         schema = {
-            'example': {
                 'name': 'Главная переговорка',
                 'description': 'Очень большая, модная и помпезная комната.'
-            }
         }
 
-    @validator('name')
-    def len_string(cls, value: str) -> str:
-        """Проверяет допустимую длину значения.
 
-        ## Args:
-        - value (str): Проверяемое значение.
+class MeetingRoomUpdate(MeetingRoomBase):
+    name: None | str = Field(
+        None,
+        title="Название комнаты",
+        min_length=1,
+        max_length=100
+    )
 
-        ## Raises:
-        - ValueError: Значение больше ограничения.
 
-        ## Returns:
-        - str: Проверенное значение.
-        """
-        if len(value) > 100:
-            raise ValueError(f'{value.__name__} is too long. Max: 100 symbols')
-        return value
+class MeetingRoomResponse(MeetingRoomBase):
+    """Схема ответа после создания новых MeetingRoom.
+    """
+    id: int
+
+    class Config:
+        title = "Схема ответа после создания новых MeetingRoom"
+        orm_mode = True
+        schema = {
+                'id': 5,
+                'name': 'Главная переговорка',
+                'description': 'Очень большая, модная и помпезная комната.'
+        }

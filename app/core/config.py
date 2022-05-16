@@ -4,7 +4,8 @@ import pydantic as pd
 class Settings(pd.BaseSettings):
     """Настройки проекта.
     """
-    debug: str = False
+    debug: bool = False
+    echo: bool = False
     app_title: str = 'Booking meeting rooms'
     version: str = '0.0.0'
     description: str = 'Really cool project'
@@ -15,3 +16,6 @@ class Settings(pd.BaseSettings):
 
 
 settings = Settings()
+
+if settings.debug:
+    settings.echo = True
