@@ -46,10 +46,10 @@ class MeetingRoomUpdate(MeetingRoomBase):
         title = "Схема для обновления MeetingRoom"
 
     @validator('name')
-    def not_null_name(cls, value):
-        if value is None:
+    def not_null_name(cls, name: str):
+        if name is None:
             raise ValueError(lit.ERR_NULL_VALUE % 'name')
-        return value
+        return name
 
 
 class MeetingRoomResponse(MeetingRoomBase):
