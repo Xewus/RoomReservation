@@ -132,3 +132,21 @@ async def update_meeting_room(
     await session.refresh(room)
 
     return room
+
+
+async def delete_meeting_room(
+    room: mr_models.MeetingRoom,
+    session: AsyncSession
+):
+    """Удаление комнаты.
+
+    ### Args:
+    - room (mr_models.MeetingRoom): _description_
+    - session (AsyncSession): _description_
+
+    ### Returns:
+    - _type_: _description_
+    """
+    await session.delete(room)
+    await session.commit()
+    return room
