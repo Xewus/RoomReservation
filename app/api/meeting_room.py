@@ -16,9 +16,23 @@ router = APIRouter(
 )
 
 
+@router.get(
+    '/',
+    summary=lit.API_GET_MEET_ROOMS,
+    response_model=list[mr_schemas.MeetingRoomResponse],
+    response_model_exclude_none=True
+)
+async def get_all_meeting_rooms(
+    session: AsyncSession = Depends(db.get_async_session)
+) -> list[mr_models.MeetingRoom]:
+
+    return await mr_crud.read_all_rooms_from_db(session)
+
+
 @router.post(
     '/',
     summary=lit.API_CREATE_MEET_ROOM,
+    status_code=HTTPStatus.CREATED,
     response_model=mr_schemas.MeetingRoomResponse,
     response_model_exclude_none=True
 )
@@ -39,7 +53,12 @@ async def create_new_meeting_room(
     ### Returns:
     - mr_models.MeetingRoom: Объект на основе вновь созданной записи в БД.
     """
-    if not await mr_crud.check_room_name_duplicate(new_room.name, session):
+    if await mr_crud.value_in_db_exist(
+        mr_models.MeetingRoom,
+        'name',
+        new_room.name,
+        session
+    ):
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
             detail=lit.ERR_ROOM_NAME_BUSY % new_room.name
@@ -48,22 +67,10 @@ async def create_new_meeting_room(
     return await mr_crud.create_meeting_room(new_room, session)
 
 
-@router.get(
-    '/',
-    summary=lit.API_GET_MEET_ROOMS,
-    response_model=list[mr_schemas.MeetingRoomResponse],
-    response_model_exclude_none=True
-)
-async def get_all_meeting_rooms(
-    session: AsyncSession = Depends(db.get_async_session)
-) -> list[mr_models.MeetingRoom]:
-
-    return await mr_crud.read_all_rooms_from_db(session)
-
-
 @router.patch(
     '/',
     summary=lit.API_UPDATE_MEET_ROOM,
+    status_code=HTTPStatus.ACCEPTED,
     response_model=mr_schemas.MeetingRoomUpdate,
     response_model_exclude_none=True
 )
@@ -78,9 +85,12 @@ async def partially_update_meeting_room(
             status_code=HTTPStatus.NOT_FOUND,
             detail=lit.ERR_ROOM_NOT_FOUND_ID
         )
-    if update_data.name is not None:
-        if not await mr_crud.check_room_name_duplicate(
-            update_data.name, session
+    if update_data.name is not None and update_data.name != room.name:
+        if await mr_crud.value_in_db_exist(
+            table=mr_models.MeetingRoom,
+            table_field='name',
+            value=update_data.name,
+            session=session
         ):
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,

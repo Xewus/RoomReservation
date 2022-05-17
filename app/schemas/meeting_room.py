@@ -1,4 +1,6 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
+
+from app.core import literals as lit
 
 
 class MeetingRoomBase(BaseModel):
@@ -42,6 +44,12 @@ class MeetingRoomUpdate(MeetingRoomBase):
     class Config:
         orm_mode = True
         title = "Схема для обновления MeetingRoom"
+
+    @validator('name')
+    def not_null_name(cls, value):
+        if value is None:
+            raise ValueError(lit.ERR_NULL_VALUE % 'name')
+        return value
 
 
 class MeetingRoomResponse(MeetingRoomBase):

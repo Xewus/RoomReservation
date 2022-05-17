@@ -1,9 +1,9 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi.encoders import jsonable_encoder
 
 from app.models import meeting_room as mr_models
 from app.schemas import meeting_room as mr_schemas
+from app.core.db import Base
 
 
 async def get_meeting_room_by_id(
@@ -47,26 +47,34 @@ async def get_room_id_by_name(
         )
 
 
-async def check_room_name_duplicate(
-    room_name: str,
-    session: AsyncSession
+async def value_in_db_exist(
+    table: Base,
+    table_field: str,
+    value: str,
+    session: AsyncSession,
+    id: None | int = None,
 ) -> bool:
-    """Проверяет наличие объекта с таким же названием.
+    """Проверяет наличие значения в запрошенном поле таблицы.
 
     ### Args:
-    - room_name (str): _description_
-    - session (AsyncSession): _description_
+    - table (Base): Запрашиваемая таблица.
+    - table_field (str): Запрашиваемое поле в таблице.
+    - value (str): Проверяемое значение.
+    - session (AsyncSession): Сеесия соединения с БД.
+    - id (None | int, optional): id объекта. Defaults to None.
 
     ### Returns:
-    - bool: _description_
+    - bool: Существует или нет запрошенное значение в запрошенном поле.
     """
-    return not bool(await session.scalar(
-        select(
-            mr_models.MeetingRoom.name
-        ).where(
-            mr_models.MeetingRoom.name == room_name
+    table_field = getattr(table, table_field)
+    if id is not None:
+        table_id = getattr(table, 'id')
+        query = select(table_field).where(
+            table_field == value, table_id != id
         ).limit(1)
-    ))
+    else:
+        query = select(table_field).where(table_field == value).limit(1)
+    return bool(await session.scalar(query))
 
 
 async def read_all_rooms_from_db(
@@ -117,7 +125,6 @@ async def update_meeting_room(
     """
     for field, value in update_data.dict(exclude_unset=True).items():
         if getattr(room, field):
-            print(room.name)
             setattr(room, field, value)
 
     session.add(room)
