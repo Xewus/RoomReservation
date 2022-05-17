@@ -1,10 +1,13 @@
 import sqlalchemy as sa
+import sqlalchemy.orm as orm
 
 from app.core import db
 
 
 class MeetingRoom(db.Base):
     """ORM-модель для переговорных комнат.
+
+    `meetinfroom`
 
     ## Attrs:
     - name: Название комнаты.
@@ -17,4 +20,8 @@ class MeetingRoom(db.Base):
     )
     description = sa.Column(
         sa.Text()
+    )
+    reservation = orm.relationship(
+        'Reservation',
+        cascade='delete'
     )
