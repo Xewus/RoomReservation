@@ -1,14 +1,21 @@
+from typing import Generic, Type, TypeVar
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from pydantic import BaseModel as input_data
+from pydantic import BaseModel
 
 from app.core.db import Base
 
 
-class CRUDBase:
+ModelType = TypeVar('ModelType', bound=Base)
+CreateSchemaType = TypeVar('CreateSchemaType', bound=BaseModel)
+UpdateSchemaType = TypeVar('UpdateSchemaType', bound=BaseModel)
+
+
+class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     """Базовый класс для операций CRUD.
     """
-    def __init__(self, model):
+    def __init__(self, model: Type[ModelType]):
         self.model = model
 
     async def get_by_field(
@@ -16,7 +23,7 @@ class CRUDBase:
         field: str,
         value,
         session: AsyncSession
-    ) -> Base:
+    ) -> None | ModelType:
         """Находит один объект по значению указанного поляю
 
         ### Args:
@@ -30,18 +37,18 @@ class CRUDBase:
         ### Returns:
         - Base: _description_
         """
-        table_field = getattr(self.model, field)
+        field = getattr(self.model, field)
         if field is None:
             raise AttributeError
         return await session.scalar(
-            select(self.model).where(table_field == value)
+            select(self.model).where(field == value)
         )
 
     async def get(
         self,
         obj_id: int,
         session: AsyncSession
-    ) -> Base:
+    ) -> None | ModelType:
         """Получает объект из БД по id.
 
         ### Args:
@@ -51,15 +58,12 @@ class CRUDBase:
         ### Returns:
         - _type_: _description_
         """
-        # return await session.scalar(
-        #     select(self.model).where(self.model.id == obj_id)
-        # )
         return await self.get_by_field('id', obj_id, session)
 
     async def get_all(
         self,
         session: AsyncSession
-    ) -> list[Base]:
+    ) -> list[ModelType]:
         """Возвращает все объекты из таблицы.
 
         ### Args:
@@ -75,9 +79,9 @@ class CRUDBase:
 
     async def create(
         self,
-        data: input_data,
+        data: CreateSchemaType,
         session: AsyncSession
-    ) -> Base:
+    ) -> ModelType:
         """Создаёт запись в БД.
 
         ### Args:
@@ -97,9 +101,9 @@ class CRUDBase:
     async def update(
         self,
         obj: Base,
-        update_data: input_data,
+        update_data: UpdateSchemaType,
         session: AsyncSession
-    ):
+    ) -> ModelType:
         """Обновляет запись в БД.
 
         ### Args:
@@ -122,7 +126,7 @@ class CRUDBase:
         self,
         obj: Base,
         session: AsyncSession
-    ):
+    ) -> ModelType:
         """Удаляет запись из БД.
 
         ### Args:
@@ -155,13 +159,12 @@ class CRUDBase:
         ### Returns:
         - bool: Существует или нет запрошенное значение в запрошенном поле.
         """
-        table_field = getattr(self.model, field)
-        if table_field is None:
-            raise AttributeError
-        if id is not None:
-            table_id = getattr(self.model, 'id')
-            return bool(await session.scalar(select(self.model).where(
-                table_field == value, table_id != id
-            ).limit(1)))
+        if id is None:
+            return bool(await self.get_by_field(field, value, session))
 
-        return bool(await self.get_by_field(field, value, session))
+        field = getattr(self.model, field)
+        if field is None:
+            raise AttributeError
+        return bool(await session.scalar(select(self.model.id).where(
+            field == value, self.model.id != id
+        ).limit(1)))
