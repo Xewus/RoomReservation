@@ -11,6 +11,32 @@ class CRUDBase:
     def __init__(self, model):
         self.model = model
 
+    async def get_by_field(
+        self,
+        field: str,
+        value,
+        session: AsyncSession
+    ) -> Base:
+        """Находит один объект по значению указанного поляю
+
+        ### Args:
+        - field (str): _description_
+        - value (_type_): _description_
+        - session (AsyncSession): _description_
+
+        ### Raises:
+        - AttributeError: _description_
+
+        ### Returns:
+        - Base: _description_
+        """
+        table_field = getattr(self.model, field)
+        if field is None:
+            raise AttributeError
+        return await session.scalar(
+            select(self.model).where(table_field == value)
+        )
+
     async def get(
         self,
         obj_id: int,
@@ -25,9 +51,10 @@ class CRUDBase:
         ### Returns:
         - _type_: _description_
         """
-        return await session.get(
-            select(self.model).where(self.model.id == obj_id)
-        )
+        # return await session.scalar(
+        #     select(self.model).where(self.model.id == obj_id)
+        # )
+        return await self.get_by_field('id', obj_id, session)
 
     async def get_all(
         self,
@@ -109,18 +136,6 @@ class CRUDBase:
         await session.commit()
         return obj
 
-    async def get_by_attribute(
-            self, 
-            attr_name: str, 
-            attr_value: str,
-            session: AsyncSession,
-    ):
-        attr = getattr(self.model, attr_name)
-        db_obj = await session.execute(
-            select(self.model).where(attr == attr_value)
-        )
-        return db_obj.scalars().first()
-
     async def value_in_db_exist(
         self,
         field: str,
@@ -140,12 +155,13 @@ class CRUDBase:
         ### Returns:
         - bool: Существует или нет запрошенное значение в запрошенном поле.
         """
-        field = getattr(self, field)
+        table_field = getattr(self.model, field)
+        if table_field is None:
+            raise AttributeError
         if id is not None:
-            table_id = getattr(self, 'id')
-            query = select(field).where(
-                field == value, table_id != id
-            ).limit(1)
-        else:
-            query = select(field).where(field == value).limit(1)
-        return bool(await session.scalar(query))
+            table_id = getattr(self.model, 'id')
+            return bool(await session.scalar(select(self.model).where(
+                table_field == value, table_id != id
+            ).limit(1)))
+
+        return bool(await self.get_by_field(field, value, session))

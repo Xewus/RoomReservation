@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core import literals as lit
 from app.core import db
-from app.crud import meeting_room as mr_crud
+from app.crud.meeting_room import meeting_room_crud as mr_crud
 from app.schemas import meeting_room as mr_schemas
 from app.models import meeting_room as mr_models
 
@@ -27,7 +27,7 @@ async def get_all_meeting_rooms(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[mr_models.MeetingRoom]:
 
-    return await mr_crud.read_all_rooms_from_db(session)
+    return await mr_crud.get_all(session)
 
 
 @router.post(
@@ -55,7 +55,6 @@ async def create_new_meeting_room(
     - mr_models.MeetingRoom: Объект на основе вновь созданной записи в БД.
     """
     if await mr_crud.value_in_db_exist(
-        mr_models.MeetingRoom,
         'name',
         new_room.name,
         session
@@ -65,7 +64,7 @@ async def create_new_meeting_room(
             detail=lit.ERR_ROOM_NAME_BUSY % new_room.name
         )
 
-    return await mr_crud.create_meeting_room(new_room, session)
+    return await mr_crud.create(new_room, session)
 
 
 @router.patch(
@@ -80,7 +79,7 @@ async def partially_update_meeting_room(
     update_data: mr_schemas.MeetingRoomUpdate,
     session: AsyncSession = Depends(db.get_async_session)
 ):
-    room = await mr_crud.get_meeting_room_by_id(room_id, session)
+    room = await mr_crud.get(room_id, session)
     if room is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
@@ -88,16 +87,13 @@ async def partially_update_meeting_room(
         )
     if update_data.name is not None and update_data.name != room.name:
         if await mr_crud.value_in_db_exist(
-            table=mr_models.MeetingRoom,
-            table_field='name',
-            value=update_data.name,
-            session=session
+            'name', update_data.name, session
         ):
             raise HTTPException(
                 status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
                 detail=lit.ERR_ROOM_NAME_BUSY % update_data.name
             )
-    return await mr_crud.update_meeting_room(room, update_data, session)
+    return await mr_crud.update(room, update_data, session)
 
 
 @router.delete(
@@ -111,10 +107,10 @@ async def remove_meeting_room(
     room_id: int,
     session: AsyncSession = Depends(db.get_async_session)
 ):
-    room = await mr_crud.get_meeting_room_by_id(room_id, session)
+    room = await mr_crud.get(room_id, session)
     if room is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail=lit.ERR_ROOM_NOT_FOUND_ID % room_id
         )
-    return await mr_crud.delete_meeting_room(room, session)
+    return await mr_crud.remove(room, session)
