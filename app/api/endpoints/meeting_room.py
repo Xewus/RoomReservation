@@ -9,12 +9,10 @@ from app.core import db
 from app.crud.meeting_room import meeting_room_crud as mr_crud
 from app.schemas import meeting_room as mr_schemas
 from app.models import meeting_room as mr_models
+from app.api import validators
 
 
-router = APIRouter(
-    prefix='/meeting_rooms',
-    tags=['Meeting Rooms']
-)
+router = APIRouter()
 
 
 @router.get(
@@ -26,7 +24,6 @@ router = APIRouter(
 async def get_all_meeting_rooms(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[mr_models.MeetingRoom]:
-
     return await mr_crud.get_all(session)
 
 
@@ -54,16 +51,7 @@ async def create_new_meeting_room(
     ### Returns:
     - mr_models.MeetingRoom: Объект на основе вновь созданной записи в БД.
     """
-    if await mr_crud.value_in_db_exist(
-        'name',
-        new_room.name,
-        session
-    ):
-        raise HTTPException(
-            status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=lit.ERR_ROOM_NAME_BUSY % new_room.name
-        )
-
+    await validators.check_name_exist(new_room.name, session)
     return await mr_crud.create(new_room, session)
 
 
@@ -79,20 +67,11 @@ async def partially_update_meeting_room(
     update_data: mr_schemas.MeetingRoomUpdate,
     session: AsyncSession = Depends(db.get_async_session)
 ):
-    room = await mr_crud.get(room_id, session)
-    if room is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=lit.ERR_ROOM_NOT_FOUND_ID % room_id
-        )
+    room = await validators.check_meeting_room_exists(room_id, session)
+
     if update_data.name is not None and update_data.name != room.name:
-        if await mr_crud.value_in_db_exist(
-            'name', update_data.name, session
-        ):
-            raise HTTPException(
-                status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-                detail=lit.ERR_ROOM_NAME_BUSY % update_data.name
-            )
+        await validators.check_name_exist(update_data.name, session)
+
     return await mr_crud.update(room, update_data, session)
 
 

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 
-from app.api import meeting_room as mr_api
+from app.api.routers import main_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -10,4 +10,4 @@ app = FastAPI(
     version=settings.version,
 )
 
-app.include_router(mr_api.router)
+app.include_router(main_router)

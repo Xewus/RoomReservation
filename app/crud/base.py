@@ -18,65 +18,6 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def __init__(self, model: Type[ModelType]):
         self.model = model
 
-    async def get_by_field(
-        self,
-        field: str,
-        value,
-        session: AsyncSession
-    ) -> None | ModelType:
-        """Находит один объект по значению указанного поляю
-
-        ### Args:
-        - field (str): _description_
-        - value (_type_): _description_
-        - session (AsyncSession): _description_
-
-        ### Raises:
-        - AttributeError: _description_
-
-        ### Returns:
-        - Base: _description_
-        """
-        field = getattr(self.model, field)
-        if field is None:
-            raise AttributeError
-        return await session.scalar(
-            select(self.model).where(field == value)
-        )
-
-    async def get(
-        self,
-        obj_id: int,
-        session: AsyncSession
-    ) -> None | ModelType:
-        """Получает объект из БД по id.
-
-        ### Args:
-        - obj_id (int): _description_
-        - session (AsyncSession): _description_
-
-        ### Returns:
-        - _type_: _description_
-        """
-        return await self.get_by_field('id', obj_id, session)
-
-    async def get_all(
-        self,
-        session: AsyncSession
-    ) -> list[ModelType]:
-        """Возвращает все объекты из таблицы.
-
-        ### Args:
-        - session (AsyncSession): _description_
-
-        ### Returns:
-        - _type_: _description_
-        """
-        objects = await session.scalars(
-            select(self.model)
-        )
-        return objects.all()
-
     async def create(
         self,
         data: CreateSchemaType,
@@ -140,10 +81,69 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         await session.commit()
         return obj
 
+    async def get(
+        self,
+        obj_id: int,
+        session: AsyncSession
+    ) -> None | ModelType:
+        """Получает объект из БД по id.
+
+        ### Args:
+        - obj_id (int): _description_
+        - session (AsyncSession): _description_
+
+        ### Returns:
+        - _type_: _description_
+        """
+        return await session.get(self. model, obj_id)
+
+    async def get_all(
+        self,
+        session: AsyncSession
+    ) -> list[ModelType]:
+        """Возвращает все объекты из таблицы.
+
+        ### Args:
+        - session (AsyncSession): _description_
+
+        ### Returns:
+        - _type_: _description_
+        """
+        objects = await session.scalars(
+            select(self.model)
+        )
+        return objects.all()
+
+    async def get_by_field(
+        self,
+        field: str,
+        value,
+        session: AsyncSession
+    ) -> None | ModelType:
+        """Находит один объект по значению указанного поляю
+
+        ### Args:
+        - field (str): _description_
+        - value (_type_): _description_
+        - session (AsyncSession): _description_
+
+        ### Raises:
+        - AttributeError: _description_
+
+        ### Returns:
+        - Base: _description_
+        """
+        field = getattr(self.model, field)
+        if field is None:
+            raise AttributeError
+        return await session.scalar(
+            select(self.model).where(field == value)
+        )
+
     async def value_in_db_exist(
         self,
         field: str,
-        value: str,
+        value,
         session: AsyncSession,
         id: None | int = None,
     ) -> bool:
@@ -165,6 +165,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         field = getattr(self.model, field)
         if field is None:
             raise AttributeError
+
         return bool(await session.scalar(select(self.model.id).where(
             field == value, self.model.id != id
         ).limit(1)))
