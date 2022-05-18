@@ -6,7 +6,6 @@ Create Date: 2022-05-12 14:02:39.783884
 
 """
 from alembic import op
-import sqlalchemy as sa
 
 revision = 'cce4a2afcf08'
 down_revision = '551fdbedab78'
@@ -15,10 +14,10 @@ depends_on = None
 
 
 def upgrade():
-    # writed be Xewus
+    # writed by Xewus
     op.rename_table('mettingroom', 'meetingroom')
 
 
 def downgrade():
-    # writed be Xewus
+    # writed by Xewus
     op.rename_table('meetingroom', 'mettingroom')

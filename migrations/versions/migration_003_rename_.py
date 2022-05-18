@@ -6,7 +6,6 @@ Create Date: 2022-05-18 16:24:31.397267
 
 """
 from alembic import op
-import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
@@ -17,7 +16,7 @@ depends_on = None
 
 
 def upgrade():
-    # writed be Xewus
+    # writed by Xewus
     op.alter_column(
         table_name='reservation',
         column_name='from_reserve',
@@ -36,7 +35,7 @@ def upgrade():
 
 
 def downgrade():
-    # writed be Xewus
+    # writed by Xewus
     op.alter_column(
         table_name='reservation',
         new_column_name='from_reserve',
