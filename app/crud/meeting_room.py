@@ -1,9 +1,10 @@
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
-from .base import CRUDBase
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.meeting_room import MeetingRoom
 from app.schemas.meeting_room import MeetingRoomCreate, MeetingRoomUpdate
+
+from .base import CRUDBase
 
 
 class CRUDMeetingRoom(CRUDBase[

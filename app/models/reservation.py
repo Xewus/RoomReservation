@@ -1,6 +1,7 @@
 import sqlalchemy as sa
 
 from app.core import db
+from app.core import literals as lit
 
 
 class Reservation(db.Base):
@@ -9,6 +10,9 @@ class Reservation(db.Base):
     ### Args:
     - db (_type_): _description_
     """
-    from_reserve = sa.Column(sa.DateTime)
-    to_reserve = sa.Column(sa.DateTime)
-    meetingroom_id = sa.Column(sa.Integer, sa.ForeignKey('meetingroom.id'))
+    start_time = sa.Column(sa.DateTime)
+    end_time = sa.Column(sa.DateTime)
+    room_id = sa.Column(sa.Integer, sa.ForeignKey('meetingroom.id'))
+
+    def __repr__(self) -> str:
+        return lit.ROOM_BUSY % self.start_time, self.end_time

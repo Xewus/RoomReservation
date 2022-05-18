@@ -1,16 +1,14 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Body, Depends, HTTPException
-
+from fastapi import APIRouter, Body, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core import literals as lit
-from app.core import db
-from app.crud.meeting_room import meeting_room_crud as mr_crud
-from app.schemas import meeting_room as mr_schemas
-from app.models import meeting_room as mr_models
 from app.api import validators
-
+from app.core import db
+from app.core import literals as lit
+from app.crud.meeting_room import meeting_room_crud as mr_crud
+from app.models import meeting_room as mr_models
+from app.schemas import meeting_room as mr_schemas
 
 router = APIRouter()
 
@@ -52,6 +50,7 @@ async def create_new_meeting_room(
     - mr_models.MeetingRoom: Объект на основе вновь созданной записи в БД.
     """
     await validators.check_name_exist(new_room.name, session)
+
     return await mr_crud.create(new_room, session)
 
 
@@ -86,10 +85,6 @@ async def remove_meeting_room(
     room_id: int,
     session: AsyncSession = Depends(db.get_async_session)
 ):
-    room = await mr_crud.get(room_id, session)
-    if room is None:
-        raise HTTPException(
-            status_code=HTTPStatus.NOT_FOUND,
-            detail=lit.ERR_ROOM_NOT_FOUND_ID % room_id
-        )
+    room = await validators.check_meeting_room_exists(room_id, session)
+
     return await mr_crud.remove(room, session)

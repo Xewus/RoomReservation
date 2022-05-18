@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer
-from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base, declared_attr, sessionmaker
 
 from app.core.config import settings
 
