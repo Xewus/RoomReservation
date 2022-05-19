@@ -5,10 +5,10 @@ from pydantic import BaseModel, Field, root_validator, validator, Extra
 from app.core import literals as lit
 
 START_TIME = (
-    datetime.now() + timedelta(minutes=10)
+    datetime.now() + timedelta(hours=10)
 ).isoformat(timespec='minutes')
 END_TIME = (
-    datetime.now() + timedelta(hours=1)
+    datetime.now() + timedelta(hours=11)
 ).isoformat(timespec='minutes')
 
 

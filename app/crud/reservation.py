@@ -35,5 +35,20 @@ class CRUDReservation(CRUDBase[
         reservations = await session.scalars(query)
         return reservations.all()
 
+    async def get_busy_times_for_room(
+        self,
+        room_id: int,
+        session: AsyncSession
+    ) -> list[Reservation]:
+        reservations = await session.scalars(
+            select(
+                Reservation
+            ).where(
+                Reservation.room_id == room_id,
+                Reservation.end_time > datetime.now()
+            )
+        )
+        return reservations.all()
+
 
 reservation_crud = CRUDReservation(Reservation)

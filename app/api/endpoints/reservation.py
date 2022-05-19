@@ -86,3 +86,16 @@ async def delete_reservation(
         session
     )
     return await crud.remove(reservation, session)
+
+
+@router.get(
+    '/{room_id}/reservations',
+    summary=lit.API_BUSY_PERIODS,
+    response_model=list[schema.ReservationBase]
+)
+async def get_reservations_for_room(
+    room_id: int,
+    session: AsyncSession = Depends(db.get_async_session)
+) -> list[model.Reservation]:
+    await validators.check_meeting_room_exists(room_id, session)
+    return await crud.get_busy_times_for_room(room_id, session)

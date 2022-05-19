@@ -7,6 +7,7 @@ API_CREATE_RESERVATION = 'Создаёт новую бронь на комнат
 API_GET_RESERVATION = 'Возвращает список броней'
 API_UPDATE_RESERVATION = 'Обновляет данные брони на комнату'
 API_DELETE_RESERVATION = 'Удаляет бронь'
+API_BUSY_PERIODS = 'Взовращает занятые периоды времени для указанной комнаты'
 
 ROOM_BUSY = 'Занято с %s до %s'
 
