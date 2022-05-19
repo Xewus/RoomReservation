@@ -19,7 +19,7 @@ class CRUDReservation(CRUDBase[
         room_id: int,
         start_time: datetime,
         end_time: datetime,
-        reservation_id: None | int,
+        reservation_id: None | int = None,
         session: AsyncSession
     ) -> list[Reservation]:
         query = select(Reservation).where(

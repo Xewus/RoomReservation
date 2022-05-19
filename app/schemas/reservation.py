@@ -1,22 +1,32 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, root_validator, validator, Extra
 
 from app.core import literals as lit
+
+START_TIME = (
+    datetime.now() + timedelta(minutes=10)
+).isoformat(timespec='minutes')
+END_TIME = (
+    datetime.now() + timedelta(hours=1)
+).isoformat(timespec='minutes')
 
 
 class ReservationBase(BaseModel):
     start_time: datetime = Field(
         ...,
-        title='Начало брони'
+        title='Начало брони',
+        example=START_TIME
     )
     end_time: datetime = Field(
         ...,
-        title='Конец брони'
+        title='Конец брони',
+        example=END_TIME
     )
 
     class Config:
         orm_mode = True
+        extra = Extra.forbid
 
     @root_validator(skip_on_failure=True)
     def reserv_validate(cls, values: dict):
@@ -24,11 +34,11 @@ class ReservationBase(BaseModel):
         end = values.get('end_time')
         if not (start and end):
             raise ValueError(
-                lit.ERR_NOT_ENOUGH_VALUES % 'start_time, end_time'
+                lit.ERR_NOT_ENOUGH_VALUES
             )
-        if end < start:
+        if end <= start:
             raise ValueError(
-                lit.ERR_TIME_RESERVATION % start, end
+                lit.ERR_PERIOD_RESERVATION % (start, end)
             )
         return values
 

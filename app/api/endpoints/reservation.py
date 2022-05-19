@@ -44,6 +44,33 @@ async def create(
     return await crud.create(new_reserve, session)
 
 
+@router.patch(
+    '/{reservation_id}',
+    summary=lit.API_UPDATE_RESERVATION,
+    response_model=schema.ReservationUpdate
+)
+async def update_reservation(
+    reservation_id: int,
+    update_data: schema.ReservationUpdate,
+    session: AsyncSession = Depends(db.get_async_session)
+):
+    reservation = await validators.check_reservation_exists(
+        reservation_id,
+        session
+    )
+    await validators.check_time_reservation(
+        **update_data.dict(),
+        reservation_id=reservation_id,
+        room_id=reservation.room_id,
+        session=session
+    )
+    return await crud.update(
+        obj=reservation,
+        update_data=update_data,
+        session=session
+    )
+
+
 @router.delete(
     '/{reservation_id}',
     summary=lit.API_DELETE_RESERVATION,
@@ -54,5 +81,8 @@ async def delete_reservation(
     reservation_id: int,
     session: AsyncSession = Depends(db.get_async_session)
 ) -> model.Reservation:
-    reservation = await validators.check_reservation_exists(reservation_id, session)
+    reservation = await validators.check_reservation_exists(
+        reservation_id,
+        session
+    )
     return await crud.remove(reservation, session)
