@@ -7,6 +7,7 @@ from app.core import literals as lit
 from app.crud.meeting_room import meeting_room_crud as mr_crud
 from app.crud.reservation import reservation_crud as rsr_crud
 from app.models.meeting_room import MeetingRoom
+from app.models.reservation import Reservation
 
 
 async def check_name_exist(
@@ -59,6 +60,19 @@ async def check_time_reservation(**kwargs) -> None:
     if reservations:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=lit.ERR_TIME_RESERVE % str(reservations)
+            detail=lit.ERR_TIME_RESERVATION % reservations
 
         )
+
+
+async def check_reservation_exists(
+    reservation_id: int,
+    session: AsyncSession
+) -> Reservation:
+    reservation = await rsr_crud.get(reservation_id, session)
+    if reservation is None:
+        raise HTTPException(
+            status_code=HTTPStatus.NOT_FOUND,
+            detail=lit.ERR_RESERVATION_NOT_FOUND_ID % reservation_id
+        )
+    return reservation

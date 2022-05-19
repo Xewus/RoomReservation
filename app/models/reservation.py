@@ -15,4 +15,4 @@ class Reservation(db.Base):
     room_id = sa.Column(sa.Integer, sa.ForeignKey('meetingroom.id'))
 
     def __repr__(self) -> str:
-        return lit.ROOM_BUSY % self.start_time, self.end_time
+        return lit.ROOM_BUSY % (self.start_time, self.end_time)

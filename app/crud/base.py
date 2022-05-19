@@ -1,4 +1,5 @@
 from typing import Generic, Type, TypeVar
+from fastapi.encoders import jsonable_encoder
 
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -54,9 +55,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         ### Returns:
         - _type_: _description_
         """
-        for field, value in update_data.dict(exclude_unset=True).items():
-            if getattr(obj, field):
-                setattr(obj, field, value)
+        obj_data = jsonable_encoder(obj)
+        update_data = update_data.dict(exclude_unset=True)
+        for field in obj_data:
+            if field in update_data:
+                setattr(obj, field, update_data[field])
+
         session.add(obj)
         await session.commit()
         await session.refresh(obj)
