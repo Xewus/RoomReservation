@@ -21,3 +21,11 @@ Install requirements
 ```
 pip install -r requriments.txt
 ```
+.env
+```
+APP_TITLE=<Your title>
+DATABASE_URL=<sqlite+aiosqlite:///./fastapi.db>
+VERSION=0.1.1
+DESCRIPTION=<Your description>
+SECRET_KEY=<Your long string>
+```

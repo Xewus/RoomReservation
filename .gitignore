@@ -72,3 +72,4 @@ venv/
 .project
 .dbeaver
 .git
+fastapi.db
