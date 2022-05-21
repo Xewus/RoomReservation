@@ -14,6 +14,8 @@ class CRUDReservation(CRUDBase[
     ReservationCreate,
     ReservationUpdate
 ]):
+    """Класс с дополнительными методами для таблицы `Reservation`.
+    """
     async def get_reservations_by_time(
         self,
         *,  # все дальнейшие параметры по ключу
@@ -23,6 +25,18 @@ class CRUDReservation(CRUDBase[
         reservation_id: None | int = None,
         session: AsyncSession
     ) -> list[Reservation]:
+        """Получает список броней попадающих в указанный период времени.
+
+        ### Args:
+        - start_time (datetime): Начала периода.
+        - end_time (datetime): Конец периода.
+        - session (AsyncSession): Объект сессии.
+        - reservation_id (None | int): Бронь, время которой следует исключить
+          из списка. Defaults to None.
+
+        ### Returns:
+        - list[Reservation]: Список броней.
+        """
         query = select(Reservation).where(
             Reservation.room_id == room_id,
             Reservation.start_time.between(start_time, end_time) |
@@ -41,6 +55,17 @@ class CRUDReservation(CRUDBase[
         room_id: int,
         session: AsyncSession
     ) -> list[Reservation]:
+        """Список броней для указанной комнаты.
+
+        Список начинается с актуального времени.
+
+        ### Args:
+        - room_id (int): Id комнаты.
+        - session (AsyncSession): Объект сессии.
+
+        ### Returns:
+        - list[Reservation]: Список броней.
+        """
         reservations = await session.scalars(
             select(
                 Reservation
@@ -56,6 +81,16 @@ class CRUDReservation(CRUDBase[
         user: UserDB,
         session: AsyncSession
     ) -> list[Reservation]:
+        """
+        Список броней указанного пользователя.
+
+        ### Args:
+        - user (UserDB): Пользователь.
+        - session (AsyncSession): Объект сессии.
+
+        ### Returns:
+        - list[Reservation]: Список броней.
+        """
         reservations = await session.scalars(
             select(
                 Reservation
