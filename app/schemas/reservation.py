@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta
 
-from pydantic import BaseModel, Field, root_validator, validator, Extra
+from pydantic import BaseModel, Field, UUID4, root_validator, validator, Extra
 
 from app.core import literals as lit
 
@@ -68,3 +68,4 @@ class ReservationResponse(ReservationBase):
         ...,
         title='Номер комнаты'
     )
+    user_id: None | UUID4

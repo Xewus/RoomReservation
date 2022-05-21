@@ -6,9 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api import validators
 from app.core import db
 from app.core import literals as lit
+from app.core import user
 from app.crud.reservation import reservation_crud as crud
 from app.models import reservation as model
-from app.schemas import reservation as schema
+from app.schemas import reservation as rsr_schema
+from app.schemas import user as user_schema
 
 router = APIRouter()
 
@@ -16,11 +18,20 @@ router = APIRouter()
 @router.get(
     '/',
     summary=lit.API_GET_RESERVATION,
-    response_model=list[schema.ReservationResponse]
+    response_model=list[rsr_schema.ReservationResponse],
+    dependencies=[Depends(user.current_superuser)]
 )
 async def get_all_reservations(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
+    """Только для суперюзеров.
+
+    ### Args:
+    - session (AsyncSession, optional): _description_. Defaults to Depends(db.get_async_session).
+
+    ### Returns:
+    - list[model.Reservation]: _description_
+    """
     return await crud.get_all(session)
 
 
@@ -28,11 +39,12 @@ async def get_all_reservations(
     '/',
     summary=lit.API_CREATE_RESERVATION,
     status_code=HTTPStatus.CREATED,
-    response_model=schema.ReservationResponse
+    response_model=rsr_schema.ReservationResponse
 )
 async def create(
-    new_reserve: schema.ReservationCreate,
-    session: AsyncSession = Depends(db.get_async_session)
+    new_reserve: rsr_schema.ReservationCreate,
+    session: AsyncSession = Depends(db.get_async_session),
+    user: user_schema.UserDB = Depends(user.current_user)
 ) -> model.Reservation:
     await validators.check_meeting_room_exists(new_reserve.room_id, session)
     await validators.check_time_reservation(
@@ -41,17 +53,17 @@ async def create(
         end_time=new_reserve.end_time,
         session=session
     )
-    return await crud.create(new_reserve, session)
+    return await crud.create(new_reserve, session, user)
 
 
 @router.patch(
     '/{reservation_id}',
     summary=lit.API_UPDATE_RESERVATION,
-    response_model=schema.ReservationUpdate
+    response_model=rsr_schema.ReservationUpdate
 )
 async def update_reservation(
     reservation_id: int,
-    update_data: schema.ReservationUpdate,
+    update_data: rsr_schema.ReservationUpdate,
     session: AsyncSession = Depends(db.get_async_session)
 ):
     reservation = await validators.check_reservation_exists(
@@ -75,7 +87,7 @@ async def update_reservation(
     '/{reservation_id}',
     summary=lit.API_DELETE_RESERVATION,
     status_code=HTTPStatus.OK,
-    response_model=schema.ReservationResponse
+    response_model=rsr_schema.ReservationResponse
 )
 async def delete_reservation(
     reservation_id: int,
@@ -91,7 +103,7 @@ async def delete_reservation(
 @router.get(
     '/{room_id}/reservations',
     summary=lit.API_BUSY_PERIODS,
-    response_model=list[schema.ReservationBase]
+    response_model=list[rsr_schema.ReservationBase]
 )
 async def get_reservations_for_room(
     room_id: int,

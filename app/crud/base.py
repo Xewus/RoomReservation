@@ -6,6 +6,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.db import Base
+from app.schemas import user as user_schema
 
 ModelType = TypeVar('ModelType', bound=Base)
 CreateSchemaType = TypeVar('CreateSchemaType', bound=BaseModel)
@@ -21,7 +22,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     async def create(
         self,
         data: CreateSchemaType,
-        session: AsyncSession
+        session: AsyncSession,
+        user: None | user_schema.UserDB = None
     ) -> ModelType:
         """Создаёт запись в БД.
 
@@ -33,6 +35,8 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         - Base: _description_
         """
         data = data.dict()
+        if user is not None:
+            data['user_id'] = user.id
         obj = self.model(**data)
         session.add(obj)
         await session.commit()
