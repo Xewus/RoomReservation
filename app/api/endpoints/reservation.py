@@ -24,13 +24,7 @@ router = APIRouter()
 async def get_all_reservations(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
-    """Только для суперюзеров.
-
-    ### Args:
-    - session (AsyncSession, optional): _description_. Defaults to Depends(db.get_async_session).
-
-    ### Returns:
-    - list[model.Reservation]: _description_
+    """Только для суперюзеров. Списоквсех броней.
     """
     return await crud.get_all(session)
 
@@ -44,8 +38,10 @@ async def get_all_reservations(
 async def create(
     new_reserve: rsr_schema.ReservationCreate,
     session: AsyncSession = Depends(db.get_async_session),
-    user: user_schema.UserDB = Depends(user.current_user)
+    current_user: user_schema.UserDB = Depends(user.current_user)
 ) -> model.Reservation:
+    """Создаёт бронь.
+    """
     await validators.check_meeting_room_exists(new_reserve.room_id, session)
     await validators.check_time_reservation(
         room_id=new_reserve.room_id,
@@ -53,22 +49,26 @@ async def create(
         end_time=new_reserve.end_time,
         session=session
     )
-    return await crud.create(new_reserve, session, user)
+    return await crud.create(new_reserve, session, current_user)
 
 
 @router.patch(
     '/{reservation_id}',
     summary=lit.API_UPDATE_RESERVATION,
-    response_model=rsr_schema.ReservationUpdate
+    response_model=rsr_schema.ReservationResponse
 )
 async def update_reservation(
     reservation_id: int,
     update_data: rsr_schema.ReservationUpdate,
-    session: AsyncSession = Depends(db.get_async_session)
+    session: AsyncSession = Depends(db.get_async_session),
+    current_user: user_schema.UserDB = Depends(user.current_user)
 ):
+    """Изменяет бронь.
+    """
     reservation = await validators.check_reservation_exists(
         reservation_id,
-        session
+        session,
+        current_user
     )
     await validators.check_time_reservation(
         **update_data.dict(),
@@ -91,11 +91,15 @@ async def update_reservation(
 )
 async def delete_reservation(
     reservation_id: int,
-    session: AsyncSession = Depends(db.get_async_session)
+    session: AsyncSession = Depends(db.get_async_session),
+    current_user: user_schema.UserDB = Depends(user.current_user)
 ) -> model.Reservation:
+    """Удаляет бронь.
+    """
     reservation = await validators.check_reservation_exists(
         reservation_id,
-        session
+        session,
+        current_user
     )
     return await crud.remove(reservation, session)
 
@@ -109,5 +113,24 @@ async def get_reservations_for_room(
     room_id: int,
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
+    """Список броней для указанной комнаты.
+    """
     await validators.check_meeting_room_exists(room_id, session)
     return await crud.get_busy_times_for_room(room_id, session)
+
+
+@router.get(
+    '/my_reservations',
+    response_model=list[rsr_schema.ReservationResponse],
+    response_model_exclude={'user_id'}
+)
+async def get_my_reservations(
+    user: user_schema.UserDB = Depends(user.current_user),
+    session: AsyncSession = Depends(db.get_async_session)
+) -> list[model.Reservation]:
+    """Возвращает список броней запращивающего пользователя.
+    """
+    return await crud.get_reservation_by_user(
+        user=user,
+        session=session
+    )

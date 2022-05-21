@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.base import CRUDBase
 from app.models.reservation import Reservation
 from app.schemas.reservation import ReservationCreate, ReservationUpdate
+from app.schemas.user import UserDB
 
 
 class CRUDReservation(CRUDBase[
@@ -46,6 +47,20 @@ class CRUDReservation(CRUDBase[
             ).where(
                 Reservation.room_id == room_id,
                 Reservation.end_time > datetime.now()
+            )
+        )
+        return reservations.all()
+
+    async def get_reservation_by_user(
+        self,
+        user: UserDB,
+        session: AsyncSession
+    ) -> list[Reservation]:
+        reservations = await session.scalars(
+            select(
+                Reservation
+            ).where(
+                Reservation.user_id == user.id
             )
         )
         return reservations.all()

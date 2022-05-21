@@ -11,6 +11,8 @@ class Settings(pd.BaseSettings):
     description: str = 'Really cool project'
     database_url: str = 'sqlite+aiosqlite:///./test.db'
     secret: str = 'SECRET'
+    first_superuser_email: None | pd.EmailStr = None
+    first_superuser_password: None | str = None
 
     class Config:
         env_file = '.env'
