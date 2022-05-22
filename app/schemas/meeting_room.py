@@ -4,8 +4,6 @@ from app.core import literals as lit
 
 
 class MeetingRoomBase(BaseModel):
-    """ Базовый класс-схема для MeetingRoom.
-    """
     name: str = Field(
         ...,
         title="Название комнаты",
@@ -19,8 +17,6 @@ class MeetingRoomBase(BaseModel):
 
 
 class MeetingRoomCreate(MeetingRoomBase):
-    """Схема для создания новых MeetingRoom.
-    """
 
     class Config:
         orm_mode = True
@@ -32,8 +28,6 @@ class MeetingRoomCreate(MeetingRoomBase):
 
 
 class MeetingRoomUpdate(MeetingRoomBase):
-    """Схема для обновления MeetingRoom.
-    """
     name: None | str = Field(
         None,
         title="Название комнаты",
@@ -53,8 +47,6 @@ class MeetingRoomUpdate(MeetingRoomBase):
 
 
 class MeetingRoomResponse(MeetingRoomBase):
-    """Схема ответа после создания новых MeetingRoom.
-    """
     id: int
 
     class Config:

@@ -14,7 +14,9 @@ class CRUDReservation(CRUDBase[
     ReservationCreate,
     ReservationUpdate
 ]):
-    """Класс с дополнительными методами для таблицы `Reservation`.
+    """Класс с дополнительными методами для таблицы `reservation`.
+
+    Родительские методы переопределены для документирования.
     """
     async def get_reservations_by_time(
         self,
@@ -99,6 +101,74 @@ class CRUDReservation(CRUDBase[
             )
         )
         return reservations.all()
+
+    async def get(
+        self, room_id: int, session: AsyncSession
+    ) -> None | Reservation:
+        """Получает бронь с указанным id.
+
+        ### Args:
+        - room_id (int): id искомой брони.
+        - session (AsyncSession): Объект сессии.
+
+        ### Returns:
+        - None | Reservation: Запрошенная бронь.
+        """
+        return await super().get(room_id, session)
+
+    async def create(
+        self,
+        data: ReservationCreate,
+        session: AsyncSession,
+        user: None | UserDB = None
+    ) -> Reservation:
+        """Создаёт новую бронь.
+
+        ### Args:
+        - data (ReservationCreate): Данные для создания брони.
+        - session (AsyncSession): Объект сессии.
+        - user (None | UserDB, optional): Пользователь, создающий бронь.
+            Defaults to None.
+
+        ### Returns:
+        - Reservation: Вновь созданная бронь.
+        """
+        return await super().create(data, session, user)
+
+    async def update(
+        self,
+        reservation: Reservation,
+        update_data: ReservationUpdate,
+        session: AsyncSession
+    ) -> Reservation:
+        """Обновление данных указанной брони.
+
+        ### Args:
+        - reservation (Reservation): Запрошенная бронь.
+        - update_data (ReservationUpdate): Данные для обновления.
+        - session (AsyncSession): Объект сессии.
+
+        ### Returns:
+        - Reservation: Обновлённая бронь.
+        """
+        return await super().update(reservation, update_data, session)
+
+    async def remove(
+        self,
+        reservation: Reservation,
+        session: AsyncSession
+    ) -> Reservation:
+        """Удаляет указанную бронь.
+
+        ### Args:
+        - reservation (Reservation): Запрошенная бронь.
+        - session (AsyncSession): Объект сессии.
+
+        ### Returns:
+        - Reservation: Обновлённая бронь.
+            После удаления данные брони всё ещё остаются в сессии.
+        """
+        return await super().remove(reservation, session)
 
 
 reservation_crud = CRUDReservation(Reservation)

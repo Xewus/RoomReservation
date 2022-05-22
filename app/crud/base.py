@@ -28,11 +28,14 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Создаёт запись в БД.
 
         ### Args:
-        - obj_in (BaseModel): _description_
-        - session (AsyncSession): _description_
+        - data (CreateSchemaType): Данные для записи в БД.
+        - session (AsyncSession): Объект сессии.
+        - user (None | user_schema.UserDB, optional):
+            Пользователь, связанный с записью.
+            Defaults to None.
 
         ### Returns:
-        - Base: _description_
+        - ModelType: Объект, записаный в БД.
         """
         data = data.dict()
         if user is not None:
@@ -52,12 +55,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Обновляет запись в БД.
 
         ### Args:
-        - obj (Base): _description_
-        - update_data (input_data): _description_
-        - session (AsyncSession): _description_
+        - obj (Base): Редактируемый объект.
+        - update_data (UpdateSchemaType): Обновляемые данные.
+        - session (AsyncSession): Объект сессии.
 
         ### Returns:
-        - _type_: _description_
+        - ModelType: Обновлённый объект.
         """
         obj_data = jsonable_encoder(obj)
         update_data = update_data.dict(exclude_unset=True)
@@ -78,11 +81,13 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Удаляет запись из БД.
 
         ### Args:
-        - obj (Base): _description_
-        - session (AsyncSession): _description_
+        - obj (Base): Удаляемый объект.
+        - session (AsyncSession): Объект сессии.
 
         ### Returns:
-        - _type_: _description_
+        - ModelType:
+            Удалённый объект.
+            Данные объекта всё ещё хранятся в сессии после удаления из БД.
         """
         await session.delete(obj)
         await session.commit()
@@ -96,11 +101,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Получает объект из БД по id.
 
         ### Args:
-        - obj_id (int): _description_
-        - session (AsyncSession): _description_
+        - obj_id (int): id искомого объекта.
+        - session (AsyncSession): Объект сессии.
 
         ### Returns:
-        - _type_: _description_
+        - None | ModelType: Найденный объект.
         """
         return await session.get(self. model, obj_id)
 
@@ -111,10 +116,10 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Возвращает все объекты из таблицы.
 
         ### Args:
-        - session (AsyncSession): _description_
+        - session (AsyncSession): Объект сессии.
 
         ### Returns:
-        - _type_: _description_
+        - list[ModelType]: Список объектов.
         """
         objects = await session.scalars(
             select(self.model)
@@ -127,18 +132,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         value,
         session: AsyncSession
     ) -> None | ModelType:
-        """Находит один объект по значению указанного поляю
+        """Находит один объект по значению указанного поля.
 
         ### Args:
-        - field (str): _description_
-        - value (_type_): _description_
-        - session (AsyncSession): _description_
+        - field (str): Поле, по которому ведётся поиск.
+        - value (_type_): Искомое значение.
+        - session (AsyncSession): Объект сессии.
 
         ### Raises:
-        - AttributeError: _description_
+        - AttributeError: Указанное поле отсутствует в таблице.
 
         ### Returns:
-        - Base: _description_
+        - None | ModelType:Найденный объект.
         """
         field = getattr(self.model, field)
         if field is None:
@@ -157,14 +162,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """Проверяет наличие значения в запрошенном поле таблицы.
 
         ### Args:
-       - table (Base): Запрашиваемая таблица.
-       - table_field (str): Запрашиваемое поле в таблице.
-       - value (str): Проверяемое значение.
-       - session (AsyncSession): Сеесия соединения с БД.
-       - id (None | int, optional): id объекта. Defaults to None.
+        - field (str): Поле, по которому ведётся поиск.
+        - value (_type_): Искомое значение.
+        - session (AsyncSession): Объект сессии.
+        - id (None | int, optional):
+            id объекта, в полях которого необходимо вести поиск.
+            Defaults to None.
+
+        ### Raises:
+        - AttributeError: Указанное поле отсутствует в таблице.
 
         ### Returns:
-        - bool: Существует или нет запрошенное значение в запрошенном поле.
+        - bool: Найдено или нет переданное значение.
         """
         if id is None:
             return bool(await self.get_by_field(field, value, session))

@@ -1,3 +1,5 @@
+"""Подключение роутеров из fastapi_users.
+"""
 from http import HTTPStatus
 from fastapi import APIRouter, HTTPException
 

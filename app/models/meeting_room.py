@@ -7,11 +7,12 @@ from app.core import db
 class MeetingRoom(db.Base):
     """ORM-модель для переговорных комнат.
 
-    `meetinfroom`
+    Назавние в БД - `meetinfroom`
 
     ## Attrs:
     - name: Название комнаты.
     - description: Описание комнаты.
+    - reservation: Связь O2M с таблицей `reservation`
     """
     name = sa.Column(
         sa.String(100),

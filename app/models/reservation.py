@@ -8,8 +8,12 @@ from app.core import literals as lit
 class Reservation(db.Base):
     """`reservation`
 
-    ### Args:
-    - db (_type_): _description_
+    ### Attrs:
+    - start_time (DateTime): Начало времени брони.
+    - end_time (DateTime): Конец времени брони.
+    - room_id (ForeignKey):
+        Ссылка на бронируему комнату в таблице ('meetingroom.id').
+    user_id (ForeignKey)Ж Ссылка на пользователя, создавшего бронь ('user.id').
     """
     start_time = sa.Column(
         sa.DateTime

@@ -40,7 +40,17 @@ async def create(
     session: AsyncSession = Depends(db.get_async_session),
     current_user: user_schema.UserDB = Depends(user.current_user)
 ) -> model.Reservation:
-    """Создаёт бронь.
+    """Создаёт новую бронь.
+
+    ### Args:
+    - new_reserve (rsr_schema.ReservationCreate): Данные для новой брони.
+    - session (AsyncSession): Объект сессии.
+    - current_user (user_schema.UserDB, optional):
+        Пользователь, создавший бронь.
+        Defaults to Depends(user.current_user).
+
+    ### Returns:
+    - model.Reservation: Вновь созданная бронь.
     """
     await validators.check_meeting_room_exists(new_reserve.room_id, session)
     await validators.check_time_reservation(
@@ -62,8 +72,21 @@ async def update_reservation(
     update_data: rsr_schema.ReservationUpdate,
     session: AsyncSession = Depends(db.get_async_session),
     current_user: user_schema.UserDB = Depends(user.current_user)
-):
-    """Изменяет бронь.
+) -> model.Reservation:
+    """Обновление данных указанной брони.
+
+    Допуск у суперюзера либо у пользователя, создавшего эту бронь.
+
+    ### Args:
+    - reservation_id (int): id обновляемой брони.
+    - update_data (rsr_schema.ReservationUpdate): Данные для обновления.
+    - session (AsyncSession, optional): Объект сессии.
+    - current_user (user_schema.UserDB, optional):
+        Пользователь, обновляющий бронь.
+        Defaults to Depends(user.current_user).
+
+    ### Returns:
+    - model.Reservation: Вновь созданная бронь.
     """
     reservation = await validators.check_reservation_exists(
         reservation_id,
@@ -94,8 +117,21 @@ async def delete_reservation(
     session: AsyncSession = Depends(db.get_async_session),
     current_user: user_schema.UserDB = Depends(user.current_user)
 ) -> model.Reservation:
-    """Удаляет бронь.
-    """
+    """Удаляет указанную бронь.
+
+    Допуск у суперюзера либо у пользователя, создавшего эту бронь.
+
+    ### Args:
+    - reservation_id (int): id удаляемой брони.
+    - session (AsyncSession, optional): Объект сессии.
+    - current_user (user_schema.UserDB, optional):
+        Пользователь, удаляющий бронь.
+        Defaults to Depends(user.current_user).
+
+    ### Returns:
+    - Обновлённая бронь.
+        После удаления данные брони всё ещё остаются в сессии.
+        """
     reservation = await validators.check_reservation_exists(
         reservation_id,
         session,
@@ -114,6 +150,16 @@ async def get_reservations_for_room(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
     """Список броней для указанной комнаты.
+
+    Список начинается с актуального времени.
+
+
+    ### Args:
+        - room_id (int): Id комнаты.
+        - session (AsyncSession): Объект сессии.
+
+    ### Returns:
+    - list[model.Reservation]: Список броней.
     """
     await validators.check_meeting_room_exists(room_id, session)
     return await crud.get_busy_times_for_room(room_id, session)
@@ -129,6 +175,13 @@ async def get_my_reservations(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
     """Возвращает список броней запращивающего пользователя.
+
+    ### Args:
+    - user (user_schema.UserDB): Пользователь, запрашивающий свои брони.
+    - session (AsyncSession): Объект сессии.
+
+    ### Returns:
+    - list[model.Reservation]: Список броней.
     """
     return await crud.get_reservation_by_user(
         user=user,

@@ -23,6 +23,14 @@ router = APIRouter()
 async def get_all_meeting_rooms(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.MeetingRoom]:
+    """Получает список всех комнат.
+
+    ### Args:
+    - session (AsyncSession): Объект сессии.
+
+    ### Returns:
+    - list[model.MeetingRoom]: Список всех комнат.
+    """
     return await crud.get_all(session)
 
 
@@ -40,18 +48,19 @@ async def create_new_meeting_room(
     ),
     session: AsyncSession = Depends(db.get_async_session)
 ) -> model.MeetingRoom:
-    """Принимает JSON и создаёт запись в базе.
+    """Создаёт новую комнату.
 
     Только для суперюзеров.
 
     ### Args:
-    - new_room: JSON с данными.
+    - new_room: Данные новой комнаты.
+    - session (AsyncSession): Объект сессии.
 
     ### Raises:
     - HTTPException: Совпадение названий.
 
     ### Returns:
-    - model.MeetingRoom: Объект на основе вновь созданной записи в БД.
+    - model.MeetingRoom: Вновь созданная комната.
     """
     await validators.check_name_exist(new_room.name, session)
 
@@ -70,17 +79,18 @@ async def partially_update_meeting_room(
     room_id: int,
     update_data: schema.MeetingRoomUpdate,
     session: AsyncSession = Depends(db.get_async_session)
-):
-    """    Только для суперюзеров.
+) -> model.MeetingRoom:
+    """Обновление данных указанной комнаты.
 
+    Только для суперюзеров.
 
     ### Args:
-    - room_id (int): _description_
-    - update_data (schema.MeetingRoomUpdate): _description_
-    - session (AsyncSession, optional): _description_. Defaults to Depends(db.get_async_session).
+    - room_id (int): id запрошенной комнаты.
+    - update_data (schema.MeetingRoomUpdate): Схема данных для обновления.
+    - session (AsyncSession): Объект сессии.
 
     ### Returns:
-    - _type_: _description_
+    - model.MeetingRoom: Обновлённая комната.
     """
     room = await validators.check_meeting_room_exists(room_id, session)
 
@@ -101,16 +111,16 @@ async def partially_update_meeting_room(
 async def remove_meeting_room(
     room_id: int,
     session: AsyncSession = Depends(db.get_async_session)
-):
-    """Только для суперюзеров.
-
+) -> model.MeetingRoom:
+    """Удаляет указанную комнату.
 
     ### Args:
     - room_id (int): _description_
-    - session (AsyncSession, optional): _description_. Defaults to Depends(db.get_async_session).
+    - session (AsyncSession, optional): Объект сессии.
 
     ### Returns:
-    - _type_: _description_
+        - model.MeetingRoom: Удалённая комната.
+            После удаления данные комнаты всё ещё остаются в сессии.
     """
     room = await validators.check_meeting_room_exists(room_id, session)
 

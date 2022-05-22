@@ -1,3 +1,5 @@
+"""Точка сбора роутеров в один роутер.
+"""
 from fastapi import APIRouter
 
 from app.api import endpoints as ends
