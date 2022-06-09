@@ -3,12 +3,11 @@ from http import HTTPStatus
 from fastapi import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
-from app.core import literals as lit
 from app.crud.meeting_room import meeting_room_crud as mr_crud
 from app.crud.reservation import reservation_crud as rsr_crud
 from app.models.meeting_room import MeetingRoom
 from app.models.reservation import Reservation
+from app.services import constants as const
 from app.schemas.user import UserDB
 
 
@@ -31,7 +30,7 @@ async def check_name_exist(
     if await mr_crud.get_id_by_name(room_name, session) is not None:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=lit.ERR_ROOM_NAME_BUSY % room_name
+            detail=const.ERR_ROOM_NAME_BUSY % room_name
         )
 
 
@@ -55,7 +54,7 @@ async def check_meeting_room_exists(
     if meeting_room is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=lit.ERR_ROOM_NOT_FOUND_ID % room_id
+            detail=const.ERR_ROOM_NOT_FOUND_ID % room_id
         )
     return meeting_room
 
@@ -73,7 +72,7 @@ async def check_time_reservation(**kwargs) -> None:
     if reservations:
         raise HTTPException(
             status_code=HTTPStatus.UNPROCESSABLE_ENTITY,
-            detail=lit.ERR_TIME_RESERVATION % (kwargs['room_id'], reservations)
+            detail=const.ERR_TIME_RESERVATION % (kwargs['room_id'], reservations)
 
         )
 
@@ -105,11 +104,11 @@ async def check_reservation_exists(
     if reservation is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
-            detail=lit.ERR_RESERVATION_NOT_FOUND_ID % reservation_id
+            detail=const.ERR_RESERVATION_NOT_FOUND_ID % reservation_id
         )
     if not user.is_superuser and reservation.user_id != user.id:
         raise HTTPException(
             status_code=HTTPStatus.FORBIDDEN,
-            detail=lit.ERR_NOT_OWNER
+            detail=const.ERR_NOT_OWNER
         )
     return reservation

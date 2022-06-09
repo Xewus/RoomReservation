@@ -1,6 +1,6 @@
 from pydantic import BaseModel, Field, validator
 
-from app.core import literals as lit
+from app.services import constants as const
 
 
 class MeetingRoomBase(BaseModel):
@@ -42,7 +42,7 @@ class MeetingRoomUpdate(MeetingRoomBase):
     @validator('name')
     def not_null_name(cls, name: str):
         if name is None:
-            raise ValueError(lit.ERR_NULL_VALUE % 'name')
+            raise ValueError(const.ERR_NULL_VALUE % 'name')
         return name
 
 

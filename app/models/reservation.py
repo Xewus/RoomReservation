@@ -2,7 +2,7 @@ import sqlalchemy as sa
 import fastapi_users_db_sqlalchemy as fa_u_sa
 
 from app.core import db
-from app.core import literals as lit
+from app.services import constants as const
 
 
 class Reservation(db.Base):
@@ -31,4 +31,4 @@ class Reservation(db.Base):
     )
 
     def __repr__(self) -> str:
-        return lit.ROOM_BUSY % (self.start_time, self.end_time)
+        return const.ROOM_BUSY % (self.start_time, self.end_time)

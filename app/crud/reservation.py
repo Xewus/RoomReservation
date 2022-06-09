@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.base import CRUDBase
@@ -169,6 +169,39 @@ class CRUDReservation(CRUDBase[
             После удаления данные брони всё ещё остаются в сессии.
         """
         return await super().remove(reservation, session)
+
+    async def count_reses_in_time_interval(
+        self,
+        start_time: datetime,
+        end_time: datetime,
+        session: AsyncSession
+    ) -> list[dict[str, int]]:
+        """Возвращает количество броней в указанный период
+        времени для каждой комнаты.
+
+        ### Args:
+        - start_time (datetime):
+            Начало временного периода.
+        - end_time (datetime):
+            _Окончание временного периода.
+        - session (AsyncSession):
+            Объект сессии БД.
+
+        ### Returns:
+        - list[dict[str, int]]:
+            Список в виде [{'room_id': 5}, ...]
+        """
+        rooms = await session.execute(
+            select(
+                [Reservation.room_id, func.count(Reservation.room_id)]
+                ).where(
+                    Reservation.start_time < end_time,
+                    Reservation.end_time > start_time
+                ).group_by(
+                    Reservation.room_id
+                )
+            )
+        return rooms.all()
 
 
 reservation_crud = CRUDReservation(Reservation)

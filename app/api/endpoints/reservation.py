@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import validators
 from app.core import db
-from app.core import literals as lit
 from app.core import user
 from app.crud.reservation import reservation_crud as crud
 from app.models import reservation as model
+from app.services import constants as const
 from app.schemas import reservation as rsr_schema
 from app.schemas import user as user_schema
 
@@ -17,21 +17,21 @@ router = APIRouter()
 
 @router.get(
     '/',
-    summary=lit.API_GET_RESERVATION,
+    summary=const.API_GET_RESERVATION,
     response_model=list[rsr_schema.ReservationResponse],
     dependencies=[Depends(user.current_superuser)]
 )
 async def get_all_reservations(
     session: AsyncSession = Depends(db.get_async_session)
 ) -> list[model.Reservation]:
-    """Только для суперюзеров. Списоквсех броней.
+    """Только для суперюзеров. Список всех броней.
     """
     return await crud.get_all(session)
 
 
 @router.post(
     '/',
-    summary=lit.API_CREATE_RESERVATION,
+    summary=const.API_CREATE_RESERVATION,
     status_code=HTTPStatus.CREATED,
     response_model=rsr_schema.ReservationResponse
 )
@@ -64,7 +64,7 @@ async def create(
 
 @router.patch(
     '/{reservation_id}',
-    summary=lit.API_UPDATE_RESERVATION,
+    summary=const.API_UPDATE_RESERVATION,
     response_model=rsr_schema.ReservationResponse
 )
 async def update_reservation(
@@ -108,7 +108,7 @@ async def update_reservation(
 
 @router.delete(
     '/{reservation_id}',
-    summary=lit.API_DELETE_RESERVATION,
+    summary=const.API_DELETE_RESERVATION,
     status_code=HTTPStatus.OK,
     response_model=rsr_schema.ReservationResponse
 )
@@ -142,7 +142,7 @@ async def delete_reservation(
 
 @router.get(
     '/{room_id}/reservations',
-    summary=lit.API_BUSY_PERIODS,
+    summary=const.API_BUSY_PERIODS,
     response_model=list[rsr_schema.ReservationBase]
 )
 async def get_reservations_for_room(

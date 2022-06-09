@@ -5,10 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import validators
 from app.core import db
-from app.core import literals as lit
 from app.core import user
 from app.crud.meeting_room import meeting_room_crud as crud
 from app.models import meeting_room as model
+from app.services import constants as const
 from app.schemas import meeting_room as schema
 
 router = APIRouter()
@@ -16,7 +16,7 @@ router = APIRouter()
 
 @router.get(
     '/',
-    summary=lit.API_GET_MEET_ROOMS,
+    summary=const.API_GET_MEET_ROOMS,
     response_model=list[schema.MeetingRoomResponse],
     response_model_exclude_none=True
 )
@@ -36,7 +36,7 @@ async def get_all_meeting_rooms(
 
 @router.post(
     '/',
-    summary=lit.API_CREATE_MEET_ROOM,
+    summary=const.API_CREATE_MEET_ROOM,
     status_code=HTTPStatus.CREATED,
     response_model=schema.MeetingRoomResponse,
     response_model_exclude_none=True,
@@ -69,7 +69,7 @@ async def create_new_meeting_room(
 
 @router.patch(
     '/{room_id}',
-    summary=lit.API_UPDATE_MEET_ROOM,
+    summary=const.API_UPDATE_MEET_ROOM,
     status_code=HTTPStatus.ACCEPTED,
     response_model=schema.MeetingRoomUpdate,
     response_model_exclude_none=True,
@@ -102,7 +102,7 @@ async def partially_update_meeting_room(
 
 @router.delete(
     '/{room_id}',
-    summary=lit.API_DELETE_MEET_ROOM,
+    summary=const.API_DELETE_MEET_ROOM,
     status_code=HTTPStatus.OK,
     response_model=schema.MeetingRoomUpdate,
     response_model_exclude_none=True,

@@ -1,5 +1,6 @@
 """Сборник строк используемых в приложении.
 """
+DATE_FORMAT = "%Y/%m/%d %H:%M:%S"
 
 API_CREATE_MEET_ROOM = 'Создаёт новую переговорную комнату'
 API_GET_MEET_ROOMS = 'Возвращает список переговорных комнат'
@@ -11,6 +12,8 @@ API_GET_RESERVATION = 'Возвращает список броней'
 API_UPDATE_RESERVATION = 'Обновляет данные брони на комнату'
 API_DELETE_RESERVATION = 'Удаляет бронь'
 API_BUSY_PERIODS = 'Взовращает занятые периоды времени для указанной комнаты'
+
+API_GOOGLE_UPLOAD = 'Загружает данные с google-диска'
 
 ROOM_BUSY = 'Занято с %s до %s'
 

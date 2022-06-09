@@ -54,7 +54,7 @@ class UserManager(fa_u.BaseUserManager[schema.UserCreate, schema.UserDB]):
         password: str,
         user: schema.UserCreate | schema.UserDB,
     ) -> None:
-        if len(password) < 8:
+        if len(password) < 3:
             raise fa_u.InvalidPasswordException(
                 reason='Password should be at least 8 characters'
             )

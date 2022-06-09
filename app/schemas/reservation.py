@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 
 from pydantic import BaseModel, Field, UUID4, root_validator, validator, Extra
 
-from app.core import literals as lit
+from app.services import constants as const
 
 START_TIME = (
     datetime.now() + timedelta(hours=10)
@@ -34,11 +34,11 @@ class ReservationBase(BaseModel):
         end = values.get('end_time')
         if not (start and end):
             raise ValueError(
-                lit.ERR_NOT_ENOUGH_VALUES
+                const.ERR_NOT_ENOUGH_VALUES
             )
         if end <= start:
             raise ValueError(
-                lit.ERR_PERIOD_RESERVATION % (start, end)
+                const.ERR_PERIOD_RESERVATION % (start, end)
             )
         return values
 
@@ -48,7 +48,7 @@ class ReservationUpdate(ReservationBase):
     @validator('start_time')
     def check_start_time(cls, value: datetime):
         if datetime.now() > value:
-            raise ValueError(lit.ERR_START_TIME)
+            raise ValueError(const.ERR_START_TIME)
         return value
 
 
