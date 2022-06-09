@@ -27,7 +27,7 @@ class Settings(pd.BaseSettings):
     token_uri: Union[None, str] =                     None
     auth_provider_x509_cert_url: Union[None, str] =   None
     client_x509_cert_url: Union[None, str] =          None
-    email_user: Union[None, str] =                         None
+    email_user: Union[None, str] =                    None
 
     class Config:
         env_file = '.env'
