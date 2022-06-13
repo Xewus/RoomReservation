@@ -3,7 +3,8 @@
 ### Python 3.10
 ### FastAPI
 
-Room Management application
+Room Management application.
+Allows you to select and book the desired room.
 
 Create virtual environment
 ```
