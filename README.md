@@ -22,7 +22,11 @@ Install requirements
 ```
 pip install -r requriments.txt
 ```
-.env
+creat `.env` file
+```
+touch .env
+```
+fill like it
 ```
 APP_TITLE=<Your title>
 DATABASE_URL=<sqlite+aiosqlite:///./fastapi.db>
