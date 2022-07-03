@@ -4,8 +4,7 @@ from fastapi import APIRouter, Body, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api import validators
-from app.core import db
-from app.core import user
+from app.core import db, user
 from app.crud.meeting_room import meeting_room_crud as crud
 from app.models import meeting_room as model
 from app.services import constants as const
