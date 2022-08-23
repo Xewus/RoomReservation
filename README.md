@@ -12,7 +12,7 @@ python3.10  -m venv venv
 ```
 Go into
 ```
-cd cd RoomReservation/
+cd RoomReservation/
 ```
 Upgrade pip
 ```
